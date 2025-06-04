@@ -3,10 +3,10 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import threading
 import time
+import os
 
 app = Flask(__name__)
 
-# Global store for token and status
 token_data = {
     "access_token": None,
     "status": "Not started"
@@ -24,16 +24,20 @@ def run_selenium_oauth():
     )
 
     options = Options()
-    # Keep headful for manual login
-    driver = webdriver.Chrome(options=options)
+    options.binary_location = "/usr/bin/chromium"  # Location in Docker/Render
+    options.add_argument("--headless")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(executable_path="/usr/bin/chromedriver", options=options)
 
     try:
-        token_data["status"] = "Browser opened, waiting for login..."
+        token_data["status"] = "Browser opened, loading login page..."
         driver.get(oauth_url)
 
-        # Wait max 60 seconds for manual login + redirect
-        max_wait = 60
-        for i in range(max_wait):
+        max_wait = 60  # seconds
+        for _ in range(max_wait):
             url = driver.current_url
             if "access_token=" in url:
                 token_part = url.split("access_token=")[1]
@@ -55,7 +59,6 @@ def index():
 
 @app.route('/start_oauth')
 def start_oauth():
-    # Reset token data and start Selenium OAuth in thread
     token_data["access_token"] = None
     token_data["status"] = "Starting OAuth..."
     thread = threading.Thread(target=run_selenium_oauth)
@@ -67,4 +70,5 @@ def token_status():
     return jsonify(token_data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Get port from env, default 5000
+    app.run(host='0.0.0.0', port=port)
