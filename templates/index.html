@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Facebook Token Dashboard</title>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        #token { margin-top: 20px; padding: 10px; border: 1px solid #ccc; background: #f9f9f9; }
+        button { padding: 10px 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <h1>Facebook OAuth Token Dashboard</h1>
+    <button id="startBtn">Start Facebook Login (Selenium)</button>
+
+    <div id="status">Status: Not started</div>
+    <div id="token">Token: None</div>
+
+</body>
+</html>
